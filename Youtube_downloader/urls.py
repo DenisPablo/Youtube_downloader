@@ -20,5 +20,5 @@ from downloader import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.download, name='home')
+    path('', views.home, name='home'),
 ]

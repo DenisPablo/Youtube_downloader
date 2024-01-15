@@ -2,12 +2,13 @@ from django.shortcuts import render
 from pytube import YouTube
 import os
 from django.http import FileResponse
+import re
 
 # Create your views here.
-async def download(request):
-    
+def home(request):
     if request.method == "GET":
-        return render(request, 'download.html')
+        return render(request, 'home.html',{
+        })
     else:
         try:
             URL = request.POST.get('url')
@@ -15,7 +16,8 @@ async def download(request):
             download_video(URL)
 
             #Obtener el nombre del archivo
-            video_id = YouTube(URL).title
+            titulo = YouTube(URL).title
+            video_id = re.sub(r'[<>:"/\\|?*]', '', titulo)
             video_filename = f'{video_id}.mp4'
 
             #Construir la ruta al archivo descargado
@@ -23,15 +25,16 @@ async def download(request):
             ruta_del_video = os.path.join(directorio_destino,video_filename)
 
             #Devolver el archivo como respuesta de archivo
-            responce = FileResponse(open(ruta_del_video, 'rb'), content_type='video/mp4')
-            responce['Content-Disposition'] = f'attachment; filename="{video_filename}"'
-            return responce
+            response = FileResponse(open(ruta_del_video, 'rb'), content_type='video/mp4')
+            response['Content-Disposition'] = f'attachment; filename="{video_filename}"'
+            return response
 
         except Exception as e:
-            return render(request, 'download.html', {
-                'error' : f'Ocurrio un error, porfavor vuelva a intentar {str(e)}'
+            return render(request, 'home.html', {
+                'error': f"Ocurrio un error porfavor vuelva a intentar {str(e)}"
             })
-        
+    
+
 def download_video(URL):
     try:
         yt = YouTube(URL)
